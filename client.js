@@ -31,7 +31,7 @@ vdomLive(function (renderLive, h) {
                 version: "v2.6"
             });
 
-            optInWidget = new FBOptInWidget(info.fbAppId, info.fbMessengerId);
+            optInWidget = new FBOptInWidget(info.fbAppId, info.fbMessengerId, info.id);
         });
     });
 
