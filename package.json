@@ -15,5 +15,9 @@
   "bugs": {
     "url": "https://github.com/unframework/botfiddle/issues"
   },
-  "homepage": "https://github.com/unframework/botfiddle#readme"
+  "homepage": "https://github.com/unframework/botfiddle#readme",
+  "dependencies": {
+    "express": "^4.14.0",
+    "express-x-hub": "^1.0.4"
+  }
 }
