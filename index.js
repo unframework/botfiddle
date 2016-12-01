@@ -15,7 +15,7 @@ var appSecret = process.env.APP_SECRET || fail('missing app secret');
 var pageToken = process.env.PAGE_TOKEN || fail('missing page token');
 var messengerId = process.env.MESSENGER_ID || fail('missing messenger ID');
 
-var senderConnectionMap = Object.create(null);
+var userMessageReadableMap = Object.create(null);
 
 var fbInputStream = new FBInputStream('mytokenisgoodya', appSecret);
 fbInputStream.on('data', function (data) {
@@ -24,22 +24,32 @@ fbInputStream.on('data', function (data) {
     var senderId = data.sender.id;
 
     if (data.optin) {
-        // stop existing message stream from a previous session
-        if (senderConnectionMap[senderId]) {
-            senderConnectionMap[senderId].disconnect();
-            delete senderConnectionMap[senderId];
+        // signal EOF to any incoming messages for existing stream (which triggers cleanup)
+        if (userMessageReadableMap[senderId]) {
+            userMessageReadableMap[senderId].push(null);
+            delete userMessageReadableMap[senderId];
         }
 
         // connect output stream to the new session
         var connection = ClientConnection.activeConnectionMap[data.optin.ref];
 
         if (connection) {
+            var inputStream = new Readable();
+            inputStream._read = function () {}; // no-op
+
+            userMessageReadableMap[senderId] = inputStream;
+
+            var outputStream = new FBUserOutputStream(pageToken, senderId);
+
             connection.connect(
-                new Readable(),
-                new FBUserOutputStream(pageToken, senderId)
+                inputStream,
+                outputStream
             );
 
-            senderConnectionMap[senderId] = connection;
+            // cut off user output when done with this connection
+            inputStream.on('end', function () {
+                outputStream.end();
+            })
 
             console.log('got opt-in for', senderId, 'session ID is', connection._id);
         }
