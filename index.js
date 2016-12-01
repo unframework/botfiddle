@@ -1,7 +1,9 @@
 var express = require('express');
+var RemoteControl = require('remote-control');
 
 var FBInputStream = require('./lib/FBInputStream');
 var FBUserOutputStream = require('./lib/FBUserOutputStream');
+var ClientConnection = require('./lib/ClientConnection');
 
 function fail(msg) {
     throw new Error(msg);
@@ -27,3 +29,5 @@ app.use('/fb-webhook', fbInputStream.webhookRouter);
 app.listen(process.env.PORT || 3000, function () {
     console.log('started');
 });
+
+var rc = new RemoteControl(ClientConnection, './client.js', 9966);
