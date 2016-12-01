@@ -8,13 +8,14 @@ function fail(msg) {
 
 var appSecret = process.env.APP_SECRET || fail('missing app secret');
 
+var fbInputStream = new WebHookRouter('mytokenisgoodya', appSecret);
+fbInputStream.on('data', function (data) {
+    console.log(data);
+});
+
 var app = express();
 
-app.use('/fb-webhook', new WebHookRouter('mytokenisgoodya', appSecret, function (senderId, text) {
-    console.log(senderId, 'text', text);
-}, function (senderId, payload) {
-    console.log(senderId, 'payload', payload);
-}));
+app.use('/fb-webhook', fbInputStream.router);
 
 app.listen(process.env.PORT || 3000, function () {
     console.log('started');
