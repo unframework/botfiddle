@@ -1,13 +1,9 @@
 var vdomLive = require('vdom-live');
 
 var FBOptInWidget = require('./lib/FBOptInWidget');
+var ACEEditorWidget = require('./lib/ACEEditorWidget');
 
 var Server = require('__server');
-
-// ACE editor
-var scriptNode = document.createElement('script');
-scriptNode.src = 'https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.5/ace.js';
-document.body.appendChild(scriptNode);
 
 // FB SDK
 (function(d, s, id){
@@ -28,6 +24,7 @@ vdomLive(function (renderLive, h) {
     var server = new Server();
     var optInStatus = false;
     var optInWidget = null;
+    var editorWidget = new ACEEditorWidget();
     var eventLog = [];
 
     server.getInfo().then(function (info) {
@@ -55,6 +52,7 @@ vdomLive(function (renderLive, h) {
 
     document.body.appendChild(renderLive(function () {
         return h('div', [
+            editorWidget, // optInStatus ? editorWidget : null,
             optInStatus ? 'Opted in!' : (
                 optInWidget ? [ 'Start new session: ', optInWidget ] : 'Loading...'
             ),
