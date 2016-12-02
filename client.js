@@ -4,6 +4,12 @@ var FBOptInWidget = require('./lib/FBOptInWidget');
 
 var Server = require('__server');
 
+// ACE editor
+var scriptNode = document.createElement('script');
+scriptNode.src = 'https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.5/ace.js';
+document.body.appendChild(scriptNode);
+
+// FB SDK
 (function(d, s, id){
     var js, fjs = d.getElementsByTagName(s)[0];
     if (d.getElementById(id)) { return; }
