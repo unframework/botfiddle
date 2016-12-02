@@ -22,6 +22,7 @@ vdomLive(function (renderLive, h) {
     var server = new Server();
     var optInStatus = false;
     var optInWidget = null;
+    var eventLog = [];
 
     server.getInfo().then(function (info) {
         whenFBLoaded.then(function () {
@@ -35,11 +36,22 @@ vdomLive(function (renderLive, h) {
         });
     });
 
+    server.getEvents().then(function (emitter) {
+        emitter.on('data', function (data) {
+            optInStatus = true;
+
+            eventLog.unshift(JSON.stringify(data));
+        });
+    });
+
     document.body.appendChild(renderLive(function () {
         return h('div', [
             optInStatus ? 'Opted in!' : (
                 optInWidget ? [ 'Start new session: ', optInWidget ] : 'Loading...'
-            )
+            ),
+            h('ul', { style: { border: '1px solid #eee' } }, eventLog.map(function (entry) {
+                return h('li', entry);
+            }))
         ]);
     }));
 });
