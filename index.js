@@ -55,6 +55,14 @@ fbInputStream.on('data', function (data) {
         }
     }
 
+    if (data.message) {
+        var userInputStream = userMessageReadableMap[senderId];
+
+        if (userInputStream) {
+            userInputStream.push(data);
+        }
+    }
+
     // @todo this
     // var outputStream = new FBUserOutputStream(pageToken, senderId);
     // outputStream.write({ text: 'Hi there!' });
