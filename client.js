@@ -41,6 +41,9 @@ vdomLive(function (renderLive, h) {
             optInStatus = true;
 
             eventLog.unshift(JSON.stringify(data));
+
+            // @todo remove
+            server.sendMessage({ text: 'Hi from the browser!' });
         });
     });
 
