@@ -22,6 +22,7 @@ vdomLive(function (renderLive, h) {
     var server = new Server();
     var optInStatus = false;
     var optInWidget = null;
+    var eventLog = [];
 
     server.getInfo().then(function (info) {
         whenFBLoaded.then(function () {
@@ -31,7 +32,18 @@ vdomLive(function (renderLive, h) {
                 version: "v2.6"
             });
 
-            optInWidget = new FBOptInWidget(info.fbAppId, info.fbMessengerId);
+            optInWidget = new FBOptInWidget(info.fbAppId, info.fbMessengerId, info.id);
+        });
+    });
+
+    server.getEvents().then(function (emitter) {
+        emitter.on('data', function (data) {
+            optInStatus = true;
+
+            eventLog.unshift(JSON.stringify(data));
+
+            // @todo remove
+            server.sendMessage({ text: 'Hi from the browser!' });
         });
     });
 
@@ -39,7 +51,10 @@ vdomLive(function (renderLive, h) {
         return h('div', [
             optInStatus ? 'Opted in!' : (
                 optInWidget ? [ 'Start new session: ', optInWidget ] : 'Loading...'
-            )
+            ),
+            h('ul', { style: { border: '1px solid #eee' } }, eventLog.map(function (entry) {
+                return h('li', entry);
+            }))
         ]);
     }));
 });
