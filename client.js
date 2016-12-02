@@ -5,6 +5,8 @@ var ACEEditorWidget = require('./lib/ACEEditorWidget');
 
 var Server = require('__server');
 
+var SCRIPT = 'input.on(\'data\', function (data) {\n    console.log(data);\n    output.write({ text: \'Hi from BotFiddle browser!\' })\n});';
+
 // FB SDK
 (function(d, s, id){
     var js, fjs = d.getElementsByTagName(s)[0];
@@ -24,8 +26,13 @@ vdomLive(function (renderLive, h) {
     var server = new Server();
     var optInStatus = false;
     var optInWidget = null;
-    var editorWidget = new ACEEditorWidget();
+    var editorWidget = new ACEEditorWidget(SCRIPT);
     var eventLog = [];
+
+    function runScript() {
+        var script = editorWidget.getText();
+        console.log('running script:', script);
+    };
 
     server.getInfo().then(function (info) {
         whenFBLoaded.then(function () {
@@ -53,6 +60,7 @@ vdomLive(function (renderLive, h) {
     document.body.appendChild(renderLive(function () {
         return h('div', [
             editorWidget, // optInStatus ? editorWidget : null,
+            h('button', { onclick: function () { runScript(); } }, 'Go!'),
             optInStatus ? 'Opted in!' : (
                 optInWidget ? [ 'Start new session: ', optInWidget ] : 'Loading...'
             ),
