@@ -71,12 +71,8 @@ fbInputStream.on('data', function (data) {
 ClientConnection.setFBAppId(appId);
 ClientConnection.setFBMessengerId(messengerId);
 
-var app = express();
+var app = new express.Router();
 
 app.use('/fb-webhook', fbInputStream.webhookRouter);
 
-app.listen(process.env.PORT || 3000, function () {
-    console.log('started');
-});
-
-var rc = new RemoteControl(ClientConnection, './client.js', 9966);
+var rc = new RemoteControl(ClientConnection, './client.js', process.env.PORT || 3000, app);
