@@ -34,7 +34,7 @@ fbInputStream.on('data', function (data) {
         var connection = ClientConnection.activeConnectionMap[data.optin.ref];
 
         if (connection) {
-            var inputStream = new Readable();
+            var inputStream = new Readable({ objectMode: true });
             inputStream._read = function () {}; // no-op
 
             userMessageReadableMap[senderId] = inputStream;
