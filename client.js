@@ -7,7 +7,7 @@ var ACEEditorWidget = require('./lib/ACEEditorWidget');
 
 var Server = require('__server');
 
-var SCRIPT = 'input.on(\'data\', function (data) {\n    console.log(data);\n    output.write({ text: \'Hi from BotFiddle browser!\' })\n});';
+var SCRIPT = 'input.on(\'data\', function (data) {\n    console.log(data);\n    output.write({ text: \'Hi from BotFiddle browser!\' });\n});\n';
 
 // FB SDK
 (function(d, s, id){
