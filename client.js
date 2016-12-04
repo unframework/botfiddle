@@ -2,6 +2,7 @@ var Readable = require('stream').Readable;
 var Writable = require('stream').Writable;
 var vdomLive = require('vdom-live');
 
+var Workspace = require('./lib/workspace/Workspace');
 var FBOptInWidget = require('./lib/FBOptInWidget');
 var ACEEditorWidget = require('./lib/ACEEditorWidget');
 
@@ -100,9 +101,12 @@ vdomLive(function (renderLive, h) {
         });
     });
 
+    var workspace = new Workspace();
+
     document.body.appendChild(renderLive(function () {
-        return h('div', [
-            editorWidget, // optInStatus ? editorWidget : null,
+        return workspace.render(
+            h,
+            editorWidget,
             h('button', { onclick: function () { runScript(); } }, 'Go!'),
             optInStatus ? 'Opted in!' : (
                 optInWidget ? [ 'Start new session: ', optInWidget ] : 'Loading...'
@@ -110,6 +114,6 @@ vdomLive(function (renderLive, h) {
             h('ul', { style: { border: '1px solid #eee' } }, eventLog.map(function (entry) {
                 return h('li', entry);
             }))
-        ]);
+        );
     }));
 });
