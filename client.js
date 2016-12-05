@@ -82,10 +82,10 @@ vdomLive(function (renderLive, h) {
         });
     });
 
-    server.getEvents().then(function (emitter) {
-        emitter.on('data', function (data) {
-            messengerSession.logIncomingData(data);
+    var whenEventsLoaded = server.getEvents();
 
+    whenEventsLoaded.then(function (emitter) {
+        emitter.on('data', function (data) {
             // skip initial marker packet
             if (Object.keys(data).length < 1) {
                 return;
@@ -101,7 +101,7 @@ vdomLive(function (renderLive, h) {
     });
 
     var workspace = new Workspace();
-    var messengerSession = new MessengerSession(whenOptInWidgetLoaded);
+    var messengerSession = new MessengerSession(whenOptInWidgetLoaded, whenEventsLoaded);
 
     document.body.appendChild(renderLive(function () {
         return workspace.render(
