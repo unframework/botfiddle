@@ -4,15 +4,30 @@ var vdomLive = require('vdom-live');
 
 var Workspace = require('./lib/workspace/Workspace');
 var MessengerSession = require('./lib/workspace/MessengerSession');
+var FBOptInWidget = require('./lib/FBOptInWidget');
 var ACEEditorWidget = require('./lib/ACEEditorWidget');
 
 var Server = require('__server');
 
 var SCRIPT = 'input.on(\'data\', function (data) {\n    console.log(data);\n    output.write({ text: \'Hi from BotFiddle browser!\' });\n});\n';
 
+// FB SDK
+(function(d, s, id){
+    var js, fjs = d.getElementsByTagName(s)[0];
+    if (d.getElementById(id)) { return; }
+    js = d.createElement(s); js.id = id;
+    js.src = "//connect.facebook.net/en_US/sdk.js";
+    fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));
+
+var whenFBLoaded = new Promise(function (resolve) {
+    window.fbAsyncInit = function () {
+        resolve();
+    };
+});
+
 vdomLive(function (renderLive, h) {
     var server = new Server();
-    var messengerSession = new MessengerSession();
     var editorWidget = new ACEEditorWidget(SCRIPT);
     var eventLog = [];
 
@@ -55,8 +70,16 @@ vdomLive(function (renderLive, h) {
         );
     };
 
-    server.getInfo().then(function (info) {
-        messengerSession.initialize(info.fbAppId, info.fbMessengerId, info.id);
+    var whenOptInWidgetLoaded = server.getInfo().then(function (info) {
+        return whenFBLoaded.then(function () {
+            window.FB.init({
+                appId: info.fbAppId,
+                xfbml: false, // no parsing needed yet
+                version: "v2.6"
+            });
+
+            return new FBOptInWidget(info.fbAppId, info.fbMessengerId, info.id);
+        });
     });
 
     server.getEvents().then(function (emitter) {
@@ -78,6 +101,7 @@ vdomLive(function (renderLive, h) {
     });
 
     var workspace = new Workspace();
+    var messengerSession = new MessengerSession(whenOptInWidgetLoaded);
 
     document.body.appendChild(renderLive(function () {
         return workspace.render(
