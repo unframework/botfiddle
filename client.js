@@ -29,7 +29,6 @@ var whenFBLoaded = new Promise(function (resolve) {
 vdomLive(function (renderLive, h) {
     var server = new Server();
     var editorWidget = new ACEEditorWidget(SCRIPT);
-    var eventLog = [];
 
     var scriptInputStream = null;
     var scriptOutputStream = null;
@@ -91,9 +90,6 @@ vdomLive(function (renderLive, h) {
                 return;
             }
 
-            // @todo this better
-            eventLog.unshift(JSON.stringify(data));
-
             if (scriptInputStream) {
                 scriptInputStream.push(data);
             }
@@ -108,10 +104,7 @@ vdomLive(function (renderLive, h) {
             h,
             editorWidget,
             h('button', { onclick: function () { runScript(); } }, 'Go!'),
-            messengerSession.render(h),
-            h('ul', { style: { border: '1px solid #eee' } }, eventLog.map(function (entry) {
-                return h('li', entry);
-            }))
+            messengerSession.render(h)
         );
     }));
 });
