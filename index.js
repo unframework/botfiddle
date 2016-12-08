@@ -1,9 +1,9 @@
 var Readable = require('stream').Readable;
 var express = require('express');
 var RemoteControl = require('remote-control');
+var FBInputStream = require('facebook-messenger-streams').InputStream;
+var FBUserOutputStream = require('facebook-messenger-streams').UserOutputStream;
 
-var FBInputStream = require('./lib/FBInputStream');
-var FBUserOutputStream = require('./lib/FBUserOutputStream');
 var ClientConnection = require('./lib/ClientConnection');
 
 function fail(msg) {
