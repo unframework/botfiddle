@@ -55,6 +55,8 @@ vdomLive(function (renderLive, h) {
             // @todo wait before callback to avoid draining too fast?
             server.sendMessage(scriptMessageData);
 
+            messengerSession.logSentData(scriptMessageData);
+
             callback();
         };
 
