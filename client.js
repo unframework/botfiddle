@@ -29,7 +29,7 @@ var whenFBLoaded = new Promise(function (resolve) {
 
 (function () {
     var server = new Server();
-    var editorWidget = new ACEEditorWidget(SCRIPT);
+    var editorWidget = null;
 
     var scriptInputStream = null;
     var scriptOutputStream = null;
@@ -105,7 +105,12 @@ var whenFBLoaded = new Promise(function (resolve) {
     document.body.appendChild(root);
 
     ReactDOM.render(<Workspace
-        editorWidget={null /* editorWidget */}
+        editorWidget={<ACEEditorWidget
+            initialScript={SCRIPT}
+            ref={(ew) => {
+                editorWidget = ew;
+            }}
+        />}
         goButton={<button onClick={() => runScript()}>Go!</button>}
         messengerSession={null /* messengerSession */}
     />, root);
