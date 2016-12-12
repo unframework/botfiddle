@@ -7,6 +7,18 @@
     "start": "node index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "browserify": {
+    "transform": [
+      [
+        "babelify",
+        {
+          "presets": [
+            "react"
+          ]
+        }
+      ]
+    ]
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/unframework/botfiddle.git"
@@ -18,12 +30,15 @@
   },
   "homepage": "https://github.com/unframework/botfiddle#readme",
   "dependencies": {
+    "babel-preset-react": "^6.16.0",
+    "babelify": "^7.3.0",
     "express": "^4.14.0",
     "express-x-hub": "^1.0.4",
     "facebook-messenger-streams": "^0.0.1",
     "moment": "^2.17.1",
+    "react": "^15.4.1",
+    "react-dom": "^15.4.1",
     "remote-control": "^0.6.0",
-    "request": "^2.79.0",
-    "vdom-live": "^1.1.4"
+    "request": "^2.79.0"
   }
 }

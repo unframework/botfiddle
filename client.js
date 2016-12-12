@@ -1,10 +1,10 @@
 var Readable = require('stream').Readable;
 var Writable = require('stream').Writable;
-var vdomLive = require('vdom-live');
+var React = require('react');
+var ReactDOM = require('react-dom');
 
 var Workspace = require('./lib/workspace/Workspace');
 var MessengerSession = require('./lib/workspace/MessengerSession');
-var FBOptInWidget = require('./lib/FBOptInWidget');
 var ACEEditorWidget = require('./lib/ACEEditorWidget');
 
 var Server = require('__server');
@@ -26,9 +26,9 @@ var whenFBLoaded = new Promise(function (resolve) {
     };
 });
 
-vdomLive(function (renderLive, h) {
+(function () {
     var server = new Server();
-    var editorWidget = new ACEEditorWidget(SCRIPT);
+    var editorWidget = null;
 
     var scriptInputStream = null;
     var scriptOutputStream = null;
@@ -71,7 +71,7 @@ vdomLive(function (renderLive, h) {
         );
     };
 
-    var whenOptInWidgetLoaded = server.getInfo().then(function (info) {
+    var whenOptInInfoLoaded = server.getInfo().then(function (info) {
         return whenFBLoaded.then(function () {
             window.FB.init({
                 appId: info.fbAppId,
@@ -79,7 +79,11 @@ vdomLive(function (renderLive, h) {
                 version: "v2.6"
             });
 
-            return new FBOptInWidget(info.fbAppId, info.fbMessengerId, info.id);
+            return {
+                fbAppId: info.fbAppId,
+                fbMessengerId: info.fbMessengerId,
+                id: info.id
+            };
         });
     });
 
@@ -98,15 +102,25 @@ vdomLive(function (renderLive, h) {
         });
     });
 
-    var workspace = new Workspace();
-    var messengerSession = new MessengerSession(whenOptInWidgetLoaded, whenEventsLoaded);
+    var messengerSession = null;
 
-    document.body.appendChild(renderLive(function () {
-        return workspace.render(
-            h,
-            editorWidget,
-            h('button', { onclick: function () { runScript(); } }, 'Go!'),
-            messengerSession.render(h)
-        );
-    }));
-});
+    var root = document.createElement('div');
+    document.body.appendChild(root);
+
+    ReactDOM.render(<Workspace
+        editorWidget={<ACEEditorWidget
+            initialScript={SCRIPT}
+            ref={(ew) => {
+                editorWidget = ew;
+            }}
+        />}
+        goButton={<button onClick={() => runScript()}>Go!</button>}
+        messengerSession={<MessengerSession
+            whenOptInInfoLoaded={whenOptInInfoLoaded}
+            whenEventsLoaded={whenEventsLoaded}
+            ref={(node) => {
+                messengerSession = node;
+            }}
+        />}
+    />, root);
+})();
