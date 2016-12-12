@@ -1,6 +1,7 @@
 var Readable = require('stream').Readable;
 var Writable = require('stream').Writable;
-var vdomLive = require('vdom-live');
+var React = require('react');
+var ReactDOM = require('react-dom');
 
 var Workspace = require('./lib/workspace/Workspace');
 var MessengerSession = require('./lib/workspace/MessengerSession');
@@ -26,7 +27,7 @@ var whenFBLoaded = new Promise(function (resolve) {
     };
 });
 
-vdomLive(function (renderLive, h) {
+(function () {
     var server = new Server();
     var editorWidget = new ACEEditorWidget(SCRIPT);
 
@@ -98,15 +99,14 @@ vdomLive(function (renderLive, h) {
         });
     });
 
-    var workspace = new Workspace();
     var messengerSession = new MessengerSession(whenOptInWidgetLoaded, whenEventsLoaded);
 
-    document.body.appendChild(renderLive(function () {
-        return workspace.render(
-            h,
-            editorWidget,
-            h('button', { onclick: function () { runScript(); } }, 'Go!'),
-            messengerSession.render(h)
-        );
-    }));
-});
+    var root = document.createElement('div');
+    document.body.appendChild(root);
+
+    ReactDOM.render(<Workspace
+        editorWidget={null /* editorWidget */}
+        goButton={<button onClick={() => runScript()}>Go!</button>}
+        messengerSession={null /* messengerSession */}
+    />, root);
+})();
