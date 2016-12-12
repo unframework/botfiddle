@@ -5,7 +5,6 @@ var ReactDOM = require('react-dom');
 
 var Workspace = require('./lib/workspace/Workspace');
 var MessengerSession = require('./lib/workspace/MessengerSession');
-var FBOptInWidget = require('./lib/FBOptInWidget');
 var ACEEditorWidget = require('./lib/ACEEditorWidget');
 
 var Server = require('__server');
@@ -72,7 +71,7 @@ var whenFBLoaded = new Promise(function (resolve) {
         );
     };
 
-    var whenOptInWidgetLoaded = server.getInfo().then(function (info) {
+    var whenOptInInfoLoaded = server.getInfo().then(function (info) {
         return whenFBLoaded.then(function () {
             window.FB.init({
                 appId: info.fbAppId,
@@ -80,7 +79,11 @@ var whenFBLoaded = new Promise(function (resolve) {
                 version: "v2.6"
             });
 
-            return new FBOptInWidget(info.fbAppId, info.fbMessengerId, info.id);
+            return {
+                fbAppId: info.fbAppId,
+                fbMessengerId: info.fbMessengerId,
+                id: info.id
+            };
         });
     });
 
@@ -99,7 +102,7 @@ var whenFBLoaded = new Promise(function (resolve) {
         });
     });
 
-    var messengerSession = new MessengerSession(whenOptInWidgetLoaded, whenEventsLoaded);
+    var messengerSession = null;
 
     var root = document.createElement('div');
     document.body.appendChild(root);
@@ -112,6 +115,12 @@ var whenFBLoaded = new Promise(function (resolve) {
             }}
         />}
         goButton={<button onClick={() => runScript()}>Go!</button>}
-        messengerSession={null /* messengerSession */}
+        messengerSession={<MessengerSession
+            whenOptInInfoLoaded={whenOptInInfoLoaded}
+            whenEventsLoaded={whenEventsLoaded}
+            ref={(node) => {
+                messengerSession = node;
+            }}
+        />}
     />, root);
 })();
