@@ -1,5 +1,3 @@
-var Readable = require('stream').Readable;
-var Writable = require('stream').Writable;
 var Redux = require('redux');
 var Provider = require('react-redux').Provider;
 var React = require('react');
@@ -9,6 +7,7 @@ var Workspace = require('./lib/workspace/Workspace');
 var ScriptRunButton = require('./lib/workspace/ScriptRunButton');
 var MessengerSession = require('./lib/workspace/MessengerSession');
 var ACEEditorWidget = require('./lib/ACEEditorWidget');
+var scriptRunState = require('./lib/scriptRunState');
 
 var Server = require('__server');
 
@@ -32,56 +31,11 @@ var whenFBLoaded = new Promise(function (resolve) {
 (function () {
     var store = Redux.createStore((state = {}, action) => {
         return {
-            scriptRunState: getScriptRunState(state.scriptRunState, action)
+            scriptRunState: scriptRunState(state.scriptRunState, action)
         };
     });
 
     var server = new Server();
-
-    function getScriptRunState(scriptRunState = null, action) {
-        if (action.type !== 'SCRIPT_RUN') {
-            return scriptRunState;
-        }
-
-        // disconnect old script plumbing
-        if (scriptRunState) {
-            scriptRunState.inputStream.push(null);
-            scriptRunState.outputStream.end();
-        };
-
-        // new script plumbing
-        var scriptInputStream = new Readable({ objectMode: true });
-        scriptInputStream._read = function () {
-            // no-op
-        };
-
-        var scriptOutputStream = new Writable({ objectMode: true });
-        scriptOutputStream._write = function (scriptMessageData, encoding, callback) {
-            // send without waiting for response
-            // @todo wait before callback to avoid draining too fast?
-            server.sendMessage(scriptMessageData);
-
-            messengerSession.logSentData(scriptMessageData);
-
-            callback();
-        };
-
-        var scriptText = action.scriptText;
-
-        // @todo sandbox on domain, etc
-        var scriptBody = new Function('input', 'output', scriptText); // @todo catch?
-
-        // @todo check errors
-        scriptBody(
-            scriptInputStream,
-            scriptOutputStream
-        );
-
-        return {
-            inputStream: scriptInputStream,
-            outputStream: scriptOutputStream
-        };
-    }
 
     var whenOptInInfoLoaded = server.getInfo().then(function (info) {
         return whenFBLoaded.then(function () {
