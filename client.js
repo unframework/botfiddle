@@ -6,6 +6,7 @@ var React = require('react');
 var ReactDOM = require('react-dom');
 
 var Workspace = require('./lib/workspace/Workspace');
+var ScriptRunButton = require('./lib/workspace/ScriptRunButton');
 var MessengerSession = require('./lib/workspace/MessengerSession');
 var ACEEditorWidget = require('./lib/ACEEditorWidget');
 
@@ -31,32 +32,30 @@ var whenFBLoaded = new Promise(function (resolve) {
 (function () {
     var store = Redux.createStore((state = {}, action) => {
         return {
+            scriptRunState: getScriptRunState(state.scriptRunState, action)
         };
     });
 
     var server = new Server();
-    var editorWidget = null;
 
-    var scriptInputStream = null;
-    var scriptOutputStream = null;
+    function getScriptRunState(scriptRunState = null, action) {
+        if (action.type !== 'SCRIPT_RUN') {
+            return scriptRunState;
+        }
 
-    function runScript() {
         // disconnect old script plumbing
-        if (scriptInputStream) {
-            scriptInputStream.push(null);
-        }
-
-        if (scriptOutputStream) {
-            scriptOutputStream.end();
-        }
+        if (scriptRunState) {
+            scriptRunState.inputStream.push(null);
+            scriptRunState.outputStream.end();
+        };
 
         // new script plumbing
-        scriptInputStream = new Readable({ objectMode: true });
+        var scriptInputStream = new Readable({ objectMode: true });
         scriptInputStream._read = function () {
             // no-op
         };
 
-        scriptOutputStream = new Writable({ objectMode: true });
+        var scriptOutputStream = new Writable({ objectMode: true });
         scriptOutputStream._write = function (scriptMessageData, encoding, callback) {
             // send without waiting for response
             // @todo wait before callback to avoid draining too fast?
@@ -67,16 +66,22 @@ var whenFBLoaded = new Promise(function (resolve) {
             callback();
         };
 
-        var scriptText = editorWidget.getText();
+        var scriptText = action.scriptText;
 
         // @todo sandbox on domain, etc
         var scriptBody = new Function('input', 'output', scriptText); // @todo catch?
 
+        // @todo check errors
         scriptBody(
             scriptInputStream,
             scriptOutputStream
         );
-    };
+
+        return {
+            inputStream: scriptInputStream,
+            outputStream: scriptOutputStream
+        };
+    }
 
     var whenOptInInfoLoaded = server.getInfo().then(function (info) {
         return whenFBLoaded.then(function () {
@@ -103,13 +108,21 @@ var whenFBLoaded = new Promise(function (resolve) {
                 return;
             }
 
-            if (scriptInputStream) {
-                scriptInputStream.push(data);
+            // push event to current script
+            var scriptRunState = store.getState().scriptRunState;
+
+            if (scriptRunState !== null && scriptRunState.inputStream) {
+                scriptRunState.inputStream.push(data);
             }
         });
     });
 
     var messengerSession = null;
+    var editorWidget = null;
+
+    function getEditorText() {
+        return editorWidget.getText();
+    }
 
     var root = document.createElement('div');
     document.body.appendChild(root);
@@ -121,7 +134,7 @@ var whenFBLoaded = new Promise(function (resolve) {
                 editorWidget = ew;
             }}
         />}
-        goButton={<button onClick={() => runScript()}>Go!</button>}
+        goButton={<ScriptRunButton getEditorText={getEditorText} />}
         messengerSession={<MessengerSession
             whenOptInInfoLoaded={whenOptInInfoLoaded}
             whenEventsLoaded={whenEventsLoaded}
