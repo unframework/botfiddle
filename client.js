@@ -1,5 +1,7 @@
 var Readable = require('stream').Readable;
 var Writable = require('stream').Writable;
+var Redux = require('redux');
+var Provider = require('react-redux').Provider;
 var React = require('react');
 var ReactDOM = require('react-dom');
 
@@ -27,6 +29,11 @@ var whenFBLoaded = new Promise(function (resolve) {
 });
 
 (function () {
+    var store = Redux.createStore((state = {}, action) => {
+        return {
+        };
+    });
+
     var server = new Server();
     var editorWidget = null;
 
@@ -107,7 +114,7 @@ var whenFBLoaded = new Promise(function (resolve) {
     var root = document.createElement('div');
     document.body.appendChild(root);
 
-    ReactDOM.render(<Workspace
+    ReactDOM.render(<Provider store={store}><Workspace
         editorWidget={<ACEEditorWidget
             initialScript={SCRIPT}
             ref={(ew) => {
@@ -122,5 +129,5 @@ var whenFBLoaded = new Promise(function (resolve) {
                 messengerSession = node;
             }}
         />}
-    />, root);
+    /></Provider>, root);
 })();
