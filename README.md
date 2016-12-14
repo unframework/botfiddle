@@ -1,5 +1,9 @@
 # BotFiddle
 
+Quick React/Redux demo project that provides a jsFiddle style bot sandbox.
+
+![](docs/botfiddle-screenshot.png)
+
 ## Local Development
 
 Ensure ngrok is running. Paste the URL + `/fb-webhook/` into webhooks.
