@@ -58,9 +58,7 @@ var whenFBLoaded = new Promise(function (resolve) {
         });
     });
 
-    var whenEventsLoaded = server.getEvents();
-
-    whenEventsLoaded.then(function (emitter) {
+    server.getEvents().then(function (emitter) {
         emitter.on('data', function (data) {
             // initial marker packet
             if (Object.keys(data).length === 0) {
@@ -92,7 +90,6 @@ var whenFBLoaded = new Promise(function (resolve) {
         }.bind(this));
     });
 
-    var messengerSession = null;
     var editorWidget = null;
 
     function getEditorText() {
@@ -121,11 +118,6 @@ var whenFBLoaded = new Promise(function (resolve) {
             }}
         />}
         goButton={<ScriptRunButton getEditorText={getEditorText} onScriptMessageData={onScriptMessageData} />}
-        messengerSession={<MessengerSession
-            whenEventsLoaded={whenEventsLoaded}
-            ref={(node) => {
-                messengerSession = node;
-            }}
-        />}
+        messengerSession={<MessengerSession />}
     /></Provider>, root);
 })();
