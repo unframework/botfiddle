@@ -7,6 +7,7 @@ var Workspace = require('./lib/workspace/Workspace');
 var ScriptRunButton = require('./lib/workspace/ScriptRunButton');
 var MessengerSession = require('./lib/workspace/MessengerSession');
 var ACEEditorWidget = require('./lib/ACEEditorWidget');
+var optInInfo = require('./lib/optInInfo');
 var scriptRunState = require('./lib/scriptRunState');
 
 var Server = require('__server');
@@ -31,13 +32,14 @@ var whenFBLoaded = new Promise(function (resolve) {
 (function () {
     var store = Redux.createStore((state = {}, action) => {
         return {
+            optInInfo: optInInfo(state.optInInfo, action),
             scriptRunState: scriptRunState(state.scriptRunState, action)
         };
     });
 
     var server = new Server();
 
-    var whenOptInInfoLoaded = server.getInfo().then(function (info) {
+    server.getInfo().then(function (info) {
         return whenFBLoaded.then(function () {
             window.FB.init({
                 appId: info.fbAppId,
@@ -45,11 +47,12 @@ var whenFBLoaded = new Promise(function (resolve) {
                 version: "v2.6"
             });
 
-            return {
+            store.dispatch({
+                type: 'OPT_IN_INFO_SET',
                 fbAppId: info.fbAppId,
                 fbMessengerId: info.fbMessengerId,
-                id: info.id
-            };
+                payload: info.id
+            });
         });
     });
 
@@ -90,7 +93,6 @@ var whenFBLoaded = new Promise(function (resolve) {
         />}
         goButton={<ScriptRunButton getEditorText={getEditorText} />}
         messengerSession={<MessengerSession
-            whenOptInInfoLoaded={whenOptInInfoLoaded}
             whenEventsLoaded={whenEventsLoaded}
             ref={(node) => {
                 messengerSession = node;
