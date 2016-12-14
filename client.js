@@ -99,6 +99,17 @@ var whenFBLoaded = new Promise(function (resolve) {
         return editorWidget.getText();
     }
 
+    function onScriptMessageData(scriptMessageData) {
+        // send without waiting for response
+        server.sendMessage(scriptMessageData);
+
+        store.dispatch({
+            type: 'SESSION_EVENT',
+            data: scriptMessageData,
+            isSent: true
+        });
+    }
+
     var root = document.createElement('div');
     document.body.appendChild(root);
 
@@ -109,7 +120,7 @@ var whenFBLoaded = new Promise(function (resolve) {
                 editorWidget = ew;
             }}
         />}
-        goButton={<ScriptRunButton getEditorText={getEditorText} />}
+        goButton={<ScriptRunButton getEditorText={getEditorText} onScriptMessageData={onScriptMessageData} />}
         messengerSession={<MessengerSession
             whenEventsLoaded={whenEventsLoaded}
             ref={(node) => {
