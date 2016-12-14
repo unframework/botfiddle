@@ -8,6 +8,7 @@ var ScriptRunButton = require('./lib/workspace/ScriptRunButton');
 var MessengerSession = require('./lib/workspace/MessengerSession');
 var ACEEditorWidget = require('./lib/ACEEditorWidget');
 var optInInfo = require('./lib/optInInfo');
+var session = require('./lib/session');
 var scriptRunState = require('./lib/scriptRunState');
 
 var Server = require('__server');
@@ -33,6 +34,7 @@ var whenFBLoaded = new Promise(function (resolve) {
     var store = Redux.createStore((state = {}, action) => {
         return {
             optInInfo: optInInfo(state.optInInfo, action),
+            session: session(state.session, action),
             scriptRunState: scriptRunState(state.scriptRunState, action)
         };
     });
@@ -60,8 +62,12 @@ var whenFBLoaded = new Promise(function (resolve) {
 
     whenEventsLoaded.then(function (emitter) {
         emitter.on('data', function (data) {
-            // skip initial marker packet
-            if (Object.keys(data).length < 1) {
+            // initial marker packet
+            if (Object.keys(data).length === 0) {
+                store.dispatch({
+                    type: 'SESSION_START'
+                });
+
                 return;
             }
 
@@ -72,6 +78,12 @@ var whenFBLoaded = new Promise(function (resolve) {
                 scriptRunState.inputStream.push(data);
             }
         });
+
+        emitter.on('end', function () {
+            store.dispatch({
+                type: 'SESSION_END'
+            });
+        }.bind(this));
     });
 
     var messengerSession = null;
