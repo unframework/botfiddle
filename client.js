@@ -1,11 +1,15 @@
-var Readable = require('stream').Readable;
-var Writable = require('stream').Writable;
+var Redux = require('redux');
+var Provider = require('react-redux').Provider;
 var React = require('react');
 var ReactDOM = require('react-dom');
 
 var Workspace = require('./lib/workspace/Workspace');
+var ScriptRunButton = require('./lib/workspace/ScriptRunButton');
 var MessengerSession = require('./lib/workspace/MessengerSession');
 var ACEEditorWidget = require('./lib/ACEEditorWidget');
+var optInInfo = require('./lib/optInInfo');
+var session = require('./lib/session');
+var scriptRunState = require('./lib/scriptRunState');
 
 var Server = require('__server');
 
@@ -27,51 +31,17 @@ var whenFBLoaded = new Promise(function (resolve) {
 });
 
 (function () {
+    var store = Redux.createStore((state = {}, action) => {
+        return {
+            optInInfo: optInInfo(state.optInInfo, action),
+            session: session(state.session, action),
+            scriptRunState: scriptRunState(state.scriptRunState, action)
+        };
+    });
+
     var server = new Server();
-    var editorWidget = null;
 
-    var scriptInputStream = null;
-    var scriptOutputStream = null;
-
-    function runScript() {
-        // disconnect old script plumbing
-        if (scriptInputStream) {
-            scriptInputStream.push(null);
-        }
-
-        if (scriptOutputStream) {
-            scriptOutputStream.end();
-        }
-
-        // new script plumbing
-        scriptInputStream = new Readable({ objectMode: true });
-        scriptInputStream._read = function () {
-            // no-op
-        };
-
-        scriptOutputStream = new Writable({ objectMode: true });
-        scriptOutputStream._write = function (scriptMessageData, encoding, callback) {
-            // send without waiting for response
-            // @todo wait before callback to avoid draining too fast?
-            server.sendMessage(scriptMessageData);
-
-            messengerSession.logSentData(scriptMessageData);
-
-            callback();
-        };
-
-        var scriptText = editorWidget.getText();
-
-        // @todo sandbox on domain, etc
-        var scriptBody = new Function('input', 'output', scriptText); // @todo catch?
-
-        scriptBody(
-            scriptInputStream,
-            scriptOutputStream
-        );
-    };
-
-    var whenOptInInfoLoaded = server.getInfo().then(function (info) {
+    server.getInfo().then(function (info) {
         return whenFBLoaded.then(function () {
             window.FB.init({
                 appId: info.fbAppId,
@@ -79,48 +49,75 @@ var whenFBLoaded = new Promise(function (resolve) {
                 version: "v2.6"
             });
 
-            return {
+            store.dispatch({
+                type: 'OPT_IN_INFO_SET',
                 fbAppId: info.fbAppId,
                 fbMessengerId: info.fbMessengerId,
-                id: info.id
-            };
+                payload: info.id
+            });
         });
     });
 
-    var whenEventsLoaded = server.getEvents();
-
-    whenEventsLoaded.then(function (emitter) {
+    server.getEvents().then(function (emitter) {
         emitter.on('data', function (data) {
-            // skip initial marker packet
-            if (Object.keys(data).length < 1) {
+            // initial marker packet
+            if (Object.keys(data).length === 0) {
+                store.dispatch({
+                    type: 'SESSION_START'
+                });
+
                 return;
             }
 
-            if (scriptInputStream) {
-                scriptInputStream.push(data);
+            store.dispatch({
+                type: 'SESSION_EVENT',
+                data: data,
+                isSent: false
+            });
+
+            // push event to current script
+            var scriptRunState = store.getState().scriptRunState;
+
+            if (scriptRunState !== null && scriptRunState.inputStream) {
+                scriptRunState.inputStream.push(data);
             }
         });
+
+        emitter.on('end', function () {
+            store.dispatch({
+                type: 'SESSION_END'
+            });
+        }.bind(this));
     });
 
-    var messengerSession = null;
+    var editorWidget = null;
+
+    function getEditorText() {
+        return editorWidget.getText();
+    }
+
+    function onScriptMessageData(scriptMessageData) {
+        // send without waiting for response
+        server.sendMessage(scriptMessageData);
+
+        store.dispatch({
+            type: 'SESSION_EVENT',
+            data: scriptMessageData,
+            isSent: true
+        });
+    }
 
     var root = document.createElement('div');
     document.body.appendChild(root);
 
-    ReactDOM.render(<Workspace
+    ReactDOM.render(<Provider store={store}><Workspace
         editorWidget={<ACEEditorWidget
             initialScript={SCRIPT}
             ref={(ew) => {
                 editorWidget = ew;
             }}
         />}
-        goButton={<button onClick={() => runScript()}>Go!</button>}
-        messengerSession={<MessengerSession
-            whenOptInInfoLoaded={whenOptInInfoLoaded}
-            whenEventsLoaded={whenEventsLoaded}
-            ref={(node) => {
-                messengerSession = node;
-            }}
-        />}
-    />, root);
+        goButton={<ScriptRunButton getEditorText={getEditorText} onScriptMessageData={onScriptMessageData} />}
+        messengerSession={<MessengerSession />}
+    /></Provider>, root);
 })();
