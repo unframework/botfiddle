@@ -71,6 +71,12 @@ var whenFBLoaded = new Promise(function (resolve) {
                 return;
             }
 
+            store.dispatch({
+                type: 'SESSION_EVENT',
+                data: data,
+                isSent: false
+            });
+
             // push event to current script
             var scriptRunState = store.getState().scriptRunState;
 
