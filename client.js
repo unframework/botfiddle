@@ -1,3 +1,4 @@
+var Writable = require('stream').Writable;
 var Redux = require('redux');
 var Provider = require('react-redux').Provider;
 var React = require('react');
@@ -61,8 +62,8 @@ var whenFBLoaded = new Promise(function (resolve) {
     });
 
     server.getEvents().then(function (emitter) {
-        // @todo wrap in a writable? makes for a cleaner state metaphor
-        function onScriptMessageData(scriptMessageData) {
+        var sessionOutputStream = new Writable({ objectMode: true });
+        sessionOutputStream._write = function (scriptMessageData, encoding, callback) {
             // send without waiting for response
             server.sendMessage(scriptMessageData);
 
@@ -71,14 +72,16 @@ var whenFBLoaded = new Promise(function (resolve) {
                 data: scriptMessageData,
                 isSent: true
             });
-        }
+
+            callback();
+        };
 
         emitter.on('data', function (data) {
             // initial marker packet
             if (Object.keys(data).length === 0) {
                 store.dispatch({
                     type: 'SESSION_START',
-                    onScriptMessageData: onScriptMessageData
+                    outputStream: sessionOutputStream
                 });
 
                 return;
