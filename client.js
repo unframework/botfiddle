@@ -7,6 +7,7 @@ var Workspace = require('./lib/workspace/Workspace');
 var ScriptRunButton = require('./lib/workspace/ScriptRunButton');
 var MessengerSession = require('./lib/workspace/MessengerSession');
 var ACEEditorWidget = require('./lib/ACEEditorWidget');
+var editor = require('./lib/editor');
 var optInInfo = require('./lib/optInInfo');
 var session = require('./lib/session');
 var scriptRunState = require('./lib/scriptRunState');
@@ -33,6 +34,7 @@ var whenFBLoaded = new Promise(function (resolve) {
 (function () {
     var store = Redux.createStore((state = {}, action) => {
         return {
+            editor: editor(state.editor, action),
             optInInfo: optInInfo(state.optInInfo, action),
             session: session(state.session, action),
             scriptRunState: scriptRunState(state.scriptRunState, action)
@@ -90,12 +92,6 @@ var whenFBLoaded = new Promise(function (resolve) {
         }.bind(this));
     });
 
-    var editorWidget = null;
-
-    function getEditorText() {
-        return editorWidget.getText();
-    }
-
     function onScriptMessageData(scriptMessageData) {
         // send without waiting for response
         server.sendMessage(scriptMessageData);
@@ -111,13 +107,8 @@ var whenFBLoaded = new Promise(function (resolve) {
     document.body.appendChild(root);
 
     ReactDOM.render(<Provider store={store}><Workspace
-        editorWidget={<ACEEditorWidget
-            initialScript={SCRIPT}
-            ref={(ew) => {
-                editorWidget = ew;
-            }}
-        />}
-        goButton={<ScriptRunButton getEditorText={getEditorText} onScriptMessageData={onScriptMessageData} />}
+        editorWidget={<ACEEditorWidget initialScript={SCRIPT} />}
+        goButton={<ScriptRunButton onScriptMessageData={onScriptMessageData} />}
         messengerSession={<MessengerSession />}
     /></Provider>, root);
 })();
