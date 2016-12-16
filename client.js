@@ -61,11 +61,24 @@ var whenFBLoaded = new Promise(function (resolve) {
     });
 
     server.getEvents().then(function (emitter) {
+        // @todo wrap in a writable? makes for a cleaner state metaphor
+        function onScriptMessageData(scriptMessageData) {
+            // send without waiting for response
+            server.sendMessage(scriptMessageData);
+
+            store.dispatch({
+                type: 'SESSION_EVENT',
+                data: scriptMessageData,
+                isSent: true
+            });
+        }
+
         emitter.on('data', function (data) {
             // initial marker packet
             if (Object.keys(data).length === 0) {
                 store.dispatch({
-                    type: 'SESSION_START'
+                    type: 'SESSION_START',
+                    onScriptMessageData: onScriptMessageData
                 });
 
                 return;
@@ -92,23 +105,12 @@ var whenFBLoaded = new Promise(function (resolve) {
         }.bind(this));
     });
 
-    function onScriptMessageData(scriptMessageData) {
-        // send without waiting for response
-        server.sendMessage(scriptMessageData);
-
-        store.dispatch({
-            type: 'SESSION_EVENT',
-            data: scriptMessageData,
-            isSent: true
-        });
-    }
-
     var root = document.createElement('div');
     document.body.appendChild(root);
 
     ReactDOM.render(<Provider store={store}><Workspace
         editorWidget={<ACEEditorWidget initialScript={SCRIPT} />}
-        goButton={<ScriptRunButton onScriptMessageData={onScriptMessageData} />}
+        goButton={<ScriptRunButton />}
         messengerSession={<MessengerSession />}
     /></Provider>, root);
 })();
