@@ -5,6 +5,8 @@ function Workspace({ editorWidget, goButton, messengerSession }) {
     var editorWidthPct = 55;
 
     var header = <div style={{
+        display: 'flex',
+        alignItems: 'center',
         position: 'absolute',
         top: 0,
         left: 0,
@@ -13,11 +15,15 @@ function Workspace({ editorWidget, goButton, messengerSession }) {
         background: '#eee',
         lineHeight: headerHeightPx + 'px',
         fontFamily: 'Arial, Helvetica',
-        fontSize: '18px',
-        paddingLeft: '20px'
+        fontSize: '18px'
     }}>
-        BotFiddle
-        {goButton}
+        <span style={{
+            height: headerHeightPx + 'px',
+            lineHeight: headerHeightPx + 'px',
+            padding: '0 20px'
+        }}>BotFiddle</span>
+        <span style={{
+        }}>{goButton}</span>
     </div>;
 
     return <div style={{
