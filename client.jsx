@@ -13,6 +13,8 @@ var optInInfo = require('./lib/optInInfo');
 var session = require('./lib/session');
 var scriptRunState = require('./lib/scriptRunState');
 
+document.title = 'BotFiddle';
+
 var Server = require('__server');
 
 var SCRIPT = 'input.on(\'data\', function (data) {\n    console.log(data);\n    output.write({ text: \'Hi from BotFiddle browser!\' });\n});\n';
