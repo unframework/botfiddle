@@ -6,6 +6,62 @@ var FBOptInWidget = require('./../FBOptInWidget.jsx');
 // @todo convert to pure function
 class MessengerSession extends React.PureComponent {
     render() {
+        var eventLogContents = this.props.eventLog.length > 0
+            ? <ul style={{
+                border: '1px solid #eee',
+                listStyle: 'none',
+                margin: '10px 0 0 0',
+                padding: 0,
+                fontSize: '14px',
+                opacity: this.props.isFinished ? 0.5 : 1
+            }}>{
+                this.props.eventLog.map(function (entry, index) {
+                    var date = entry[0];
+                    var time = entry[1];
+                    var text = entry[2];
+                    var isSent = entry[3];
+                    var entryId = this.props.eventLog.length - index;
+
+                    return <li key={entryId} style={{
+                        position: 'relative',
+                        listStyleType: 'none',
+                        margin: 0,
+                        borderTop: '1px solid #ccc',
+                        padding: '10px 10px 10px 8em',
+                        background: isSent ? '#e8e8ff' : '#f0f0f0'
+                    }}>
+                        <var style={{
+                            position: 'absolute',
+                            top: '1.1em',
+                            left: 0,
+                            padding: '10px',
+                            color: '#888',
+                            fontStyle: 'normal'
+                        }}>{date}</var>
+                        <var style={{
+                            position: 'absolute',
+                            top: 0,
+                            left: 0,
+                            padding: '10px',
+                            color: '#444',
+                            fontStyle: 'normal',
+                            fontWeight: 'bold'
+                        }}>{time}</var>
+                        <div style={{
+                            whiteSpace: 'pre',
+                            fontFamily: '\'Courier New\', mono',
+                            overflow: 'auto'
+                        }}>{text}</div>
+                    </li>;
+                }.bind(this))
+            }</ul>
+            : <div style={{
+                padding: '30px 0',
+                fontSize: '14px'
+            }}>
+                You should have received a message from <i>BotFiddle</i> on Messenger. Click the &quot;Go!&quot; button to make sure script is running, and say something back!
+            </div>;
+
         return <div style={{
             position: 'absolute',
             top: 0,
@@ -22,54 +78,7 @@ class MessengerSession extends React.PureComponent {
                 ? <div>
                     Log: Sent / Received &nbsp;
                     <b>{this.props.isFinished ? '(disconnected)' : '(connected)'}</b>
-                    <ul style={{
-                        border: '1px solid #eee',
-                        listStyle: 'none',
-                        margin: '10px 0 0 0',
-                        padding: 0,
-                        fontSize: '14px',
-                        opacity: this.props.isFinished ? 0.5 : 1
-                    }}>{
-                        this.props.eventLog.map(function (entry, index) {
-                            var date = entry[0];
-                            var time = entry[1];
-                            var text = entry[2];
-                            var isSent = entry[3];
-                            var entryId = this.props.eventLog.length - index;
-
-                            return <li key={entryId} style={{
-                                position: 'relative',
-                                listStyleType: 'none',
-                                margin: 0,
-                                borderTop: '1px solid #ccc',
-                                padding: '10px 10px 10px 8em',
-                                background: isSent ? '#e8e8ff' : '#f0f0f0'
-                            }}>
-                                <var style={{
-                                    position: 'absolute',
-                                    top: '1.1em',
-                                    left: 0,
-                                    padding: '10px',
-                                    color: '#888',
-                                    fontStyle: 'normal'
-                                }}>{date}</var>
-                                <var style={{
-                                    position: 'absolute',
-                                    top: 0,
-                                    left: 0,
-                                    padding: '10px',
-                                    color: '#444',
-                                    fontStyle: 'normal',
-                                    fontWeight: 'bold'
-                                }}>{time}</var>
-                                <div style={{
-                                    whiteSpace: 'pre',
-                                    fontFamily: '\'Courier New\', mono',
-                                    overflow: 'auto'
-                                }}>{text}</div>
-                            </li>;
-                        }.bind(this))
-                    }</ul>
+                    {eventLogContents}
                 </div>
                 : (this.props.optInInfo
                     ? <div style={{
