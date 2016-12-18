@@ -13,14 +13,14 @@ function Workspace({ editorWidget, goButton, messengerSession }) {
         right: 0,
         height: headerHeightPx + 'px',
         background: '#eee',
-        lineHeight: headerHeightPx + 'px',
-        fontFamily: 'Arial, Helvetica',
-        fontSize: '18px'
+        lineHeight: headerHeightPx + 'px'
     }}>
         <span style={{
             height: headerHeightPx + 'px',
             lineHeight: headerHeightPx + 'px',
-            padding: '0 20px'
+            padding: '0 20px',
+            fontFamily: 'Arial, Helvetica',
+            fontSize: '18px'
         }}>BotFiddle</span>
         <span style={{
         }}>{goButton}</span>
@@ -90,6 +90,16 @@ function Workspace({ editorWidget, goButton, messengerSession }) {
             </div>
 
             {messengerSession}
+        </div>
+
+        <div style={{
+            position: 'absolute',
+            top: '5px',
+            right: '5px',
+            fontFamily: 'Arial, Helvetica',
+            fontSize: '14px'
+        }}>
+            <a href={'http://unframework.com'}>by @unframework</a>
         </div>
     </div>;
 }
