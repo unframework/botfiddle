@@ -60,10 +60,6 @@ fbInputStream.on('data', function (data) {
             userInputStream.push(data);
         }
     }
-
-    // @todo this
-    // var outputStream = new FBUserOutputStream(pageToken, senderId);
-    // outputStream.write({ text: 'Hi there!' });
 });
 
 ClientConnection.setFBAppId(appId);
