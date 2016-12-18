@@ -19,8 +19,6 @@ var userMessageReadableMap = Object.create(null);
 
 var fbInputStream = new FBInputStream('mytokenisgoodya', appSecret);
 fbInputStream.on('data', function (data) {
-    console.log(data);
-
     var senderId = data.sender.id;
 
     if (data.optin) {
