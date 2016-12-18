@@ -19,5 +19,5 @@ export MESSENGER_ID=352007191828560
 EOF
 
 . env.sh
-supervisor index.js
+supervisor --extensions js,jsx index.js
 ```
