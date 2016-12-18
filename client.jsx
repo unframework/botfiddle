@@ -4,10 +4,10 @@ var Provider = require('react-redux').Provider;
 var React = require('react');
 var ReactDOM = require('react-dom');
 
-var Workspace = require('./lib/workspace/Workspace');
-var ScriptRunButton = require('./lib/workspace/ScriptRunButton');
-var MessengerSession = require('./lib/workspace/MessengerSession');
-var ACEEditorWidget = require('./lib/ACEEditorWidget');
+var Workspace = require('./lib/workspace/Workspace.jsx');
+var ScriptRunButton = require('./lib/workspace/ScriptRunButton.jsx');
+var MessengerSession = require('./lib/workspace/MessengerSession.jsx');
+var ACEEditorWidget = require('./lib/ACEEditorWidget.jsx');
 var editor = require('./lib/editor');
 var optInInfo = require('./lib/optInInfo');
 var session = require('./lib/session');

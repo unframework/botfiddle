@@ -75,4 +75,4 @@ var app = new express.Router();
 
 app.use('/fb-webhook', fbInputStream.webhookRouter);
 
-var rc = new RemoteControl(ClientConnection, './client.js', process.env.PORT || 3000, app);
+var rc = new RemoteControl(ClientConnection, './client.jsx', process.env.PORT || 3000, app);

@@ -1,7 +1,7 @@
 var React = require('react');
 var connect = require('react-redux').connect;
 
-var FBOptInWidget = require('./../FBOptInWidget');
+var FBOptInWidget = require('./../FBOptInWidget.jsx');
 
 // @todo convert to pure function
 class MessengerSession extends React.PureComponent {
