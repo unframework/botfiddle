@@ -59,7 +59,7 @@ class MessengerSession extends React.PureComponent {
                 padding: '30px 0',
                 fontSize: '14px'
             }}>
-                You should have received a message from <i>BotFiddle</i> on Messenger. Click the &quot;Go!&quot; button to make sure script is running, and say something back!
+                You should have received a message from <a target="_blank" href={this.props.optInInfo && 'https://m.me/' + encodeURIComponent(this.props.optInInfo.fbMessengerId)}>BotFiddle</a> on Messenger. Click the &quot;Go!&quot; button to make sure script is running, and say something back!
             </div>;
 
         return <div style={{
