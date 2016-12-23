@@ -1,11 +1,14 @@
 var React = require('react');
 var connect = require('react-redux').connect;
 
+var Hover = require('../Hover');
+
 class ScriptRunButton extends React.Component {
     constructor() {
         super();
 
         this.state = {
+            isHovering: false,
             reactionTimeoutId: null
         };
     }
@@ -29,7 +32,13 @@ class ScriptRunButton extends React.Component {
     render() {
         var isDisabled = this.state.reactionTimeoutId !== null || !this.props.editor || !this.props.outputStream;
 
-        return <button
+        return <Hover onStart={(hoverState) => {
+            this.setState({ isHovering: true });
+
+            hoverState.whenEnded.then(() => {
+                this.setState({ isHovering: false });
+            });
+        }}><button
             disabled={isDisabled}
             onClick={() => this.onClick()}
             style={{
@@ -40,7 +49,7 @@ class ScriptRunButton extends React.Component {
                 lineHeight: '16px',
                 verticalAlign: 'middle',
                 width: '80px',
-                background: isDisabled ? '#c0e0f0' : '#80c0d0',
+                background: isDisabled ? '#c0e0f0' : (this.state.isHovering ? '#90d0e0' : '#80c0d0'),
                 cursor: isDisabled ? 'auto' : 'pointer',
                 borderRadius: '3px',
                 textAlign: 'center',
@@ -48,7 +57,7 @@ class ScriptRunButton extends React.Component {
             }}
         >
             { this.state.reactionTimeoutId !== null ? '😍' : 'Go!' }
-        </button>;
+        </button></Hover>;
     }
 }
 
