@@ -1,9 +1,9 @@
 var React = require('react');
 var connect = require('react-redux').connect;
 
-var Hover = require('../Hover');
-var Linger = require('../Linger');
-var Submit = require('../Submit');
+var Hoverable = require('../Hoverable');
+var Lingerable = require('../Lingerable');
+var Submittable = require('../Submittable');
 
 class ScriptRunButton extends React.PureComponent {
     render() {
@@ -21,9 +21,9 @@ class ScriptRunButton extends React.PureComponent {
             color: '#fff'
         };
 
-        return <Hover contents={(hoverState) =>
-            <Linger delayMs={500} active={!!hoverState} contents={(lingerState) =>
-                <Submit action={() => {
+        return <Hoverable contents={(hoverState) =>
+            <Lingerable delayMs={500} active={!!hoverState} contents={(lingerState) =>
+                <Submittable action={() => {
                     this.props.onGoClick(this.props.editor.getValue(), this.props.outputStream);
                 }} prompt={(invoke, error) => {
                     const isDisabled = !this.props.editor || !this.props.outputStream;
