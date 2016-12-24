@@ -28,6 +28,14 @@ class ScriptRunButton extends React.PureComponent {
                 }} prompt={(invoke, error) => {
                     const isDisabled = !this.props.editor || !this.props.outputStream;
 
+                    // return <ParamMap contents={(Param, getData) =>
+                    //     <form onSubmit={() => invoke(getData())}>
+                    //         <Param name="firstName" contents={(collect) =>
+                    //             <input type="text" ref={(dom) => collect(() => whenValidatedSomehow(dom.value))} />
+                    //         } />
+                    //     </form>
+                    // } />
+
                     return <button
                         disabled={isDisabled}
                         onClick={() => invoke()}
