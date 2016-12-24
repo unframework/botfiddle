@@ -2,7 +2,7 @@ var React = require('react');
 var connect = require('react-redux').connect;
 
 var Hover = require('../Hover');
-var SubmittableAction = require('../SubmittableAction');
+var Submit = require('../Submit');
 
 class ScriptRunButton extends React.Component {
     constructor() {
@@ -35,7 +35,7 @@ class ScriptRunButton extends React.Component {
             hoverState.whenEnded.then(() => {
                 this.setState({ isHovering: false });
             });
-        }}><SubmittableAction onSubmit={() => {
+        }}><Submit action={() => {
             this.props.onGoClick(this.props.editor.getValue(), this.props.outputStream);
         }} prompt={(invoke, error) => {
             const isDisabled = !this.props.editor || !this.props.outputStream;
