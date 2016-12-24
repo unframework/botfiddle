@@ -37,12 +37,12 @@ class ScriptRunButton extends React.Component {
             });
         }}><SubmittableAction onSubmit={() => {
             this.props.onGoClick(this.props.editor.getValue(), this.props.outputStream);
-        }} prompt={(actionState) => {
+        }} prompt={(invoke, error) => {
             const isDisabled = !this.props.editor || !this.props.outputStream;
 
             return <button
                 disabled={isDisabled}
-                onClick={() => actionState.submit()}
+                onClick={() => invoke()}
                 style={Object.assign({}, style, {
                     background: isDisabled ? '#c0e0f0' : style.background,
                     cursor: isDisabled ? 'auto' : 'pointer'
