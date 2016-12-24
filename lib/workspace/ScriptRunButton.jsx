@@ -4,15 +4,24 @@ var connect = require('react-redux').connect;
 var Hover = require('../Hover');
 
 class ActionState {
-    constructor(onSubmit, onSuccess) {
+    constructor(onSubmit) {
         this._onSubmit = onSubmit;
-        this._onSuccess = onSuccess;
+        this._resolveSuccess = null;
 
         this.isPending = false;
         this.error = null;
+
+        this.isComplete = false;
+        this.whenComplete = new Promise((resolve) => {
+            this._resolveSuccess = resolve;
+        });
     }
 
     submit() {
+        if (this.isComplete) {
+            throw new Error('action already complete');
+        }
+
         if (this.isPending) {
             throw new Error('action already pending');
         }
@@ -32,7 +41,9 @@ class ActionState {
 
         // on success, keep pending status but notify hook
         result.then((v) => {
-            this._onSuccess(v);
+            this.isPending = false;
+            this.isComplete = true;
+            this._resolveSuccess(v);
         });
     }
 }
@@ -42,22 +53,37 @@ class SubmittableAction extends React.Component {
         super();
 
         this.state = {
-            actionState: new ActionState(() => {
-                return this.props.onSubmit();
-            }, (v) => {
-                this.setState({
-                    actionState: null,
-                    successState: [v] // @todo this
-                })
-            }),
-            successState: null
+            actionState: this._createActionState(),
+            successValue: null
         };
+    }
+
+    _createActionState() {
+        const actionState = new ActionState(() => {
+            return this.props.onSubmit();
+        });
+
+        actionState.whenComplete.then((v) => {
+            this.setState({
+                actionState: null,
+                successValue: v
+            });
+        });
+
+        return actionState;
+    }
+
+    _reset() {
+        this.setState({
+            actionState: this._createActionState(),
+            successValue: null
+        });
     }
 
     render() {
         return this.state.actionState
             ? this.props.prompt(this.state.actionState)
-            : null; // @todo this
+            : this.props.notify(this.state.successValue, () => this._reset());
     }
 }
 
@@ -147,8 +173,11 @@ class ScriptRunButton extends React.Component {
                     cursor: isDisabled ? 'auto' : 'pointer'
                 })}
             >Go!</button>;
-        }} notify={(successState) => {
-            // successState.restart();
+        }} notify={(successValue, restart) => {
+            setTimeout(() => {
+                restart();
+            }, 300);
+
             return <button style={style}>😍</button>;
         }} />;
     }
