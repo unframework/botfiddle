@@ -4,15 +4,7 @@ var connect = require('react-redux').connect;
 var Hover = require('../Hover');
 var Submit = require('../Submit');
 
-class ScriptRunButton extends React.Component {
-    constructor() {
-        super();
-
-        this.state = {
-            isHovering: false
-        };
-    }
-
+class ScriptRunButton extends React.PureComponent {
     render() {
         const style = {
             display: 'block',
@@ -22,39 +14,38 @@ class ScriptRunButton extends React.Component {
             lineHeight: '16px',
             verticalAlign: 'middle',
             width: '80px',
-            background: this.state.isHovering ? '#90d0e0' : '#80c0d0',
             cursor: 'pointer',
             borderRadius: '3px',
             textAlign: 'center',
             color: '#fff'
         };
 
-        return <Hover onStart={(hoverState) => {
-            this.setState({ isHovering: true });
+        return <Hover contents={(hoverState) =>
+            <Submit action={() => {
+                this.props.onGoClick(this.props.editor.getValue(), this.props.outputStream);
+            }} prompt={(invoke, error) => {
+                const isDisabled = !this.props.editor || !this.props.outputStream;
 
-            hoverState.whenEnded.then(() => {
-                this.setState({ isHovering: false });
-            });
-        }}><Submit action={() => {
-            this.props.onGoClick(this.props.editor.getValue(), this.props.outputStream);
-        }} prompt={(invoke, error) => {
-            const isDisabled = !this.props.editor || !this.props.outputStream;
+                return <button
+                    disabled={isDisabled}
+                    onClick={() => invoke()}
+                    style={Object.assign({}, style, {
+                        background: isDisabled ? '#c0e0f0' : (hoverState ? '#90d0e0' : '#80c0d0'),
+                        cursor: isDisabled ? 'auto' : 'pointer'
+                    })}
+                >Go!</button>;
+            }} notify={(successValue, restart) => {
+                setTimeout(() => {
+                    restart();
+                }, 300);
 
-            return <button
-                disabled={isDisabled}
-                onClick={() => invoke()}
-                style={Object.assign({}, style, {
-                    background: isDisabled ? '#c0e0f0' : style.background,
-                    cursor: isDisabled ? 'auto' : 'pointer'
-                })}
-            >Go!</button>;
-        }} notify={(successValue, restart) => {
-            setTimeout(() => {
-                restart();
-            }, 300);
-
-            return <button style={style}>😍</button>;
-        }} /></Hover>;
+                return <button
+                    style={Object.assign({}, style, {
+                        background: hoverState ? '#90d0e0' : '#80c0d0'
+                    })}
+                >😍</button>;
+            }} />
+        } />;
     }
 }
 
